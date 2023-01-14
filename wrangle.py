@@ -7,6 +7,10 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler, Qu
 # sql ace credentials
 import env
 
+# for chart image
+from IPython.display import Image
+
+
 
 
 #----------------------------------------------
@@ -119,6 +123,60 @@ def split_data(df):
 
           
     return train, validate, test
+
+
+#-------------------------------------------------
+
+
+def scale_data(train, 
+               validate, 
+               test, 
+               values=['bedrooms', 'bathrooms', 'tax_amount', 'sq_feet'],
+               return_scaler=False):
+    '''
+    Scales the 3 data splits. 
+    Takes in train, validate, and test data splits and returns their scaled counterparts.
+    If return_scalar is True, the scaler object will be returned as well
+    '''
+    # make copies of our original data so we dont gronk up anything
+    train_scaled = train.copy()
+    validate_scaled = validate.copy()
+    test_scaled = test.copy()
+    #     make the thing
+    scaler = MinMaxScaler()
+    #     fit the thing
+    scaler.fit(train[values])
+    # applying the scaler:
+    train_scaled[values] = pd.DataFrame(scaler.transform(train[values]),
+                                                  columns=train[values].columns.values).set_index([train.index.values])
+                                                  
+    validate_scaled[values] = pd.DataFrame(scaler.transform(validate[values]),
+                                                  columns=validate[values].columns.values).set_index([validate.index.values])
+    
+    test_scaled[values] = pd.DataFrame(scaler.transform(test[values]),
+                                                 columns=test[values].columns.values).set_index([test.index.values])
+    
+    if return_scaler:
+        return scaler, train_scaled, validate_scaled, test_scaled
+    else:
+        return train_scaled, validate_scaled, test_scaled
+
+    
+
+#-------------------------------------------------
+ 
+def plot_variable_pairs(df):
+    filename = 'pairplot10000.png'
+    
+    if os.path.isfile(filename):
+        return Image(filename='pairplot10000.png')
+    else:
+        sns_plot = sns.pairplot(train.sample(10000), height = 2.0,corner = False, diag_kind = 'kde', kind = 'reg')
+        sns_plot.savefig("pairplot10000.png")
+        
+        #Clean figure from sns 
+        plt.clf()
+        return Image(filename='pairplot.png') # Show pairplot as image
 
 
 
