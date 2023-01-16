@@ -81,9 +81,28 @@ def clean_zillow(df):
     
     df = change_zillow(df)
     
+    df = handle_outliers(df)
+    
     df = rename_cols(df)
 
     df.to_csv("zillow.csv", index=False)
+
+    return df
+
+#-------------------------------------------------
+
+def handle_outliers(df):
+    '''handle outliers that do not represent properties likely for 99% of buyers and zillow visitors'''
+    
+    df = df[df.bathroomcnt <= 6]
+    
+    df = df[df.bedroomcnt <= 6]
+
+    df = df[df.taxvaluedollarcnt < 2_000_000]
+
+    df = df[df.calculatedfinishedsquarefeet < 10000]
+    
+    df = df[df.yearbuilt > 1850]
 
     return df
 
@@ -165,18 +184,4 @@ def scale_data(train,
 
 #-------------------------------------------------
  
-def plot_variable_pairs(df):
-    filename = 'pairplot10000.png'
-    
-    if os.path.isfile(filename):
-        return Image(filename='pairplot10000.png')
-    else:
-        sns_plot = sns.pairplot(train.sample(10000), height = 2.0,corner = False, diag_kind = 'kde', kind = 'reg')
-        sns_plot.savefig("pairplot10000.png")
-        
-        #Clean figure from sns 
-        plt.clf()
-        return Image(filename='pairplot.png') # Show pairplot as image
-
-
 
